@@ -1,0 +1,152 @@
+---
+title: 'Exercise 1.5.1: Bias in Self-Reported Turnout'
+author: "Geoff Hing"
+date: "12/20/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library('qss')
+```
+
+## 1. Load and summarize data
+
+1. Load the data into R and check the dimensions of the data. Also, obtain a
+summary of the data. How many observations are there? What is the range of
+years covered in this data set?
+
+There are 14 observations.
+
+The years in the data range from 1980 to 2008.
+
+```{r}
+data(turnout, package = "qss")
+
+dim(turnout)
+
+summary(turnout)
+```
+
+## 2. VAP turnout rate vs. VEP turnout rate
+
+2. Calculate the turnout rate based on the voting age population or VAP. Note that
+for this data set, we must add the total number of eligible overseas voters since
+the VAP variable does not include these individuals in the count. Next, calculate
+the turnout rate using the voting eligible population or VEP. What difference do
+you observe?
+
+The turnout rate calculated when using the VAP is lower than when using the VEP.
+
+
+```{r}
+# Add overseas eligible voters to the VAP
+VAP.and.overseas <- turnout$VAP + turnout$overseas
+# Calculate turnout rate based on VAP.
+turnout.rate.VAP <- (turnout$total / VAP.and.overseas) * 100
+names(turnout.rate.VAP) <- turnout$year
+print(turnout.rate.VAP)
+
+turnout.rate.VEP <- (turnout$total / turnout$VEP) * 100
+names(turnout.rate.VEP) <- turnout$year
+print(turnout.rate.VEP)
+
+print(turnout.rate.VAP - turnout.rate.VEP)
+
+```
+
+## 3. VAP, VEP and ANES turnout rates
+
+3. Compute the differences between the VAP and ANES estimates of turnout rate.
+How big is the difference on average? What is the range of the differences?
+Conduct the same comparison for the VEP and ANES estimates of voter turnout.
+Briefly comment on the results.
+
+For both the VAP and VEP estimates, the ANES turnout estimate is higher by nearly 10 percentage points. 
+
+```{r}
+difference.VAP.ANES <- turnout.rate.VAP - turnout$ANES
+summary(difference.VAP.ANES)
+
+difference.VEP.ANES <- turnout.rate.VEP - turnout$ANES
+summary(difference.VEP.ANES)
+```
+
+## 4. VEP vs. ANES turnout rates in midterms and presidential elections
+
+4. Compare the VEP turnout rate with the ANES turnout rate separately for
+presidential elections and midterm elections. Note that the data set excludes the
+year 2006. Does the bias of the ANES estimates vary across election types?
+
+The bias of the ANES estimates seems greater in presidential elections.
+
+```{r}
+midterm.years <- c(1982, 1986, 1990, 1994, 1998, 2002, 2006)
+pres.years <- c(1980, 1984, 1988, 1992, 1996, 2000, 2004, 2008)
+
+difference.VEP.ANES.midterm <- difference.VEP.ANES[names(difference.VEP.ANES) %in% midterm.years]
+difference.VEP.ANES.pres <- difference.VAP.ANES[names(difference.VEP.ANES) %in% pres.years]
+
+summary(difference.VEP.ANES.midterm)
+
+summary(difference.VEP.ANES.pres)
+```
+
+## 5. VEP and ANES turnout rates over time
+
+> 5. Divide the data into half by election years such that you subset the data into two
+periods. Calculate the difference between the VEP turnout rate and the ANES
+turnout rate separately for each year within each period. Has the bias of ANES
+increased over time?
+
+It looks like the bias of ANES has increased over time. The mean difference increased by nearly 2 percentage points in the later period over the earlier period.
+
+```{r}
+# Look at the center of the year variable to figure out how to split our data
+summary(turnout$year)
+```
+
+```{r}
+difference.VEP.ANES.pre.1993 <- difference.VEP.ANES[names(difference.VEP.ANES) < 1993]
+print(difference.VEP.ANES.pre.1993)
+
+difference.VEP.ANES.post.1993 <- difference.VEP.ANES[names(difference.VEP.ANES) > 1993]
+print(difference.VEP.ANES.post.1993)
+
+summary(difference.VEP.ANES.pre.1993)
+
+summary(difference.VEP.ANES.post.1993)
+```
+
+## 6. 2008 turnout rates using adjusted VAP, VAP, VEP and ANES
+
+> 6. ANES does not interview prisoners and overseas voters. Calculate an adjustment
+to the 2008 VAP turnout rate. Begin by subtracting the total number of ineligible
+felons and noncitizens from the VAP to calculate an adjusted VAP. Next,
+calculate an adjusted VAP turnout rate, taking care to subtract the number of
+overseas ballots counted from the total ballots in 2008. Compare the adjusted
+VAP turnout with the unadjusted VAP, VEP, and the ANES turnout rate. Briefly
+discuss the results.
+
+The turnout rate for 2008, calculated with the adjusted VAP is similar to, but slightly higher, than the turnout rate using the VEP. Both are significantly lower than the ANES estimate.
+
+```{r}
+VAP.adjusted <- turnout$VAP - turnout$noncit - turnout$felons
+total.not.overseas <- turnout$total - turnout$osvoters
+turnout.rate.VAP.adjusted <- (total.not.overseas / VAP.adjusted) * 100
+names(turnout.rate.VAP.adjusted) <- turnout$year
+turnout.rates.2008.compared <- c(
+  turnout.rate.VAP.adjusted[names(turnout.rate.VAP.adjusted) == 2008],
+  turnout.rate.VAP[names(turnout.rate.VAP) == 2008],
+  turnout.rate.VEP[names(turnout.rate.VEP) == 2008],
+  turnout$ANES[turnout$year == 2008]
+)
+names(turnout.rates.2008.compared) <- c(
+  'VAP.adjusted',
+  'VAP',
+  'VEP',
+  'ANES'
+)
+
+turnout.rates.2008.compared
+```

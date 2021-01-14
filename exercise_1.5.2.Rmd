@@ -1,0 +1,163 @@
+---
+title: 'Exercise 1.5.2: Understanding World Population Dynamics'
+author: "Geoff Hing"
+date: "12/20/2018"
+output: html_document
+---
+
+# Exercise 1.5.2: Understanding World Population Dynamics
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library('qss')
+
+data(Kenya, package = "qss")
+data(Sweden, package = "qss")
+data(World, package = "qss")
+```
+
+## 1. Crude Birth Rate
+
+> Compute the CBR for each period, separately for Kenya, Sweden, and the world.
+Start by computing the total person-years, recorded as a new variable within each
+existing data frame via the $ operator, by summing the person-years for men and
+women. Then, store the results as a vector of length 2 (CBRs for two periods) for
+each region with appropriate labels. You may wish to create your own function
+for the purpose of efficient programming. Briefly describe patterns you observe
+in the resulting CBRs.
+
+```{r cbr}
+Cbr <- function(births, py) {
+  return (births / py)
+}
+
+CbrDf <- function(df, period) {
+  births.total <- sum(df$births[df$period == period])
+  py.total <- sum(df$py.total[df$period == period])
+  return(Cbr(births.total, py.total))
+}
+
+CbrPeriods <- function(df) {
+  periods = unique(df$period)
+  cbrs <- c(
+    CbrDf(df, periods[1]),
+    CbrDf(df, periods[2])
+  )
+  names(cbrs) <- periods
+  
+  return(cbrs)
+}
+
+Kenya$py.total <- Kenya$py.men + Kenya$py.women
+cbr.periods.kenya <- CbrPeriods(Kenya)
+print(cbr.periods.kenya)
+print(cbr.periods.kenya[2] - cbr.periods.kenya[1])
+
+Sweden$py.total <- Sweden$py.men + Sweden$py.women
+cbr.periods.sweden <- CbrPeriods(Sweden)
+print(cbr.periods.sweden)
+print(cbr.periods.sweden[2] - cbr.periods.sweden[1])
+
+
+World$py.total <- World$py.men + World$py.women
+cbr.periods.world <- CbrPeriods(World)
+print(cbr.periods.world)
+print(cbr.periods.world[2] - cbr.periods.world[1])
+```
+
+Kenya, Sweden and the world all saw a decrease in crude birth rate (CBR). Sweden, while having a lower CBR in both periods than both Kenya and the world as a whole saw a much smaller decrease in the rates. In both periods, Kenya had a higher CBR than the world as a whole.
+
+## 2. Age-specific fertility rate
+
+> ... Compute the ASFR for Sweden and Kenya as well as
+the entire world for each of the two periods. Store the resulting ASFRs separately
+for each region. What does the pattern of these ASFRs say about reproduction
+among women in Sweden and Kenya?
+
+```{r asfr}
+# [15-50)
+# TODO: Use a loop to calculate these ranges instead of hard-coding
+kFertilityAgeRanges <- c(
+      '15-19',
+      '20-24',
+      '25-29',
+      '30-34',
+      '35-39',
+      '40-44',
+      '45-49'
+)
+
+AsfrDf <- function(df, fertility.age.ranges = NULL) {
+  if (is.null(fertility.age.ranges)) {
+
+    fertility.age.ranges <- kFertilityAgeRanges
+  }
+  births.total <- sum(df$births[df$age %in% fertility.age.ranges])
+  py.women.total <- sum(df$py.women[df$age %in% fertility.age.ranges])
+  return(births.total / py.women.total)
+}
+
+AsfrPeriods <- function(df) {
+  periods = unique(df$period)
+  asrfs <- c(
+    AsfrDf(df[df$period == periods[1], ]),
+    AsfrDf(df[df$period == periods[2], ])
+  )
+  names(asrfs) <- periods
+  
+  return(asrfs)
+}
+
+asfr.periods.kenya <- AsfrPeriods(Kenya)
+print(asfr.periods.kenya)
+print(asfr.periods.kenya[2] - asfr.periods.kenya[1])
+
+asfr.periods.sweden <- AsfrPeriods(Sweden)
+print(asfr.periods.sweden)
+print(asfr.periods.sweden[2] - asfr.periods.sweden[1])
+
+asfr.periods.world <- AsfrPeriods(World)
+print(asfr.periods.world)
+print(asfr.periods.world[2] - asfr.periods.world[1])
+```
+
+The ASFR tend to be higher than the CBR, but follow the same trends. Again, Kenya has a much higher fertility rate than both Sweden and the world, but has seen that decrease significantly.
+
+## 3. Total Fertility Rate (TFR)
+
+> ... In general, how has the number of women changed in the world from 1950 to 2000? What about the total number of births in the world?
+
+```{r tfr}
+
+TfrDf <- function(df) {
+  tfr <- 0
+  for (age.range in kFertilityAgeRanges) {
+    asfr.age.range <- AsfrDf(df, c(age.range))
+    tfr <- tfr + (asfr.age.range * 5)
+  }
+  
+  return(tfr)
+}
+
+TfrPeriods <- function(df) {
+  periods = unique(df$period)
+  tfrs <- sapply(periods, function(p) { return(TfrDf(df[df$period == p, ])) })
+  names(tfrs) <- periods
+  
+  return(tfrs)
+}
+
+tfr.periods.kenya <- TfrPeriods(Kenya)
+print(tfr.periods.kenya)
+print(tfr.periods.kenya[2] - tfr.periods.kenya[1])
+
+tfr.periods.sweden <- TfrPeriods(Sweden)
+print(tfr.periods.sweden)
+print(tfr.periods.sweden[2] - tfr.periods.sweden[1])
+
+tfr.periods.world <- TfrPeriods(World)
+print(tfr.periods.world)
+print(tfr.periods.world[2] - tfr.periods.world[1])
+```
+
+Based on this, it seems like the total number of women in the world would continue to increase from 1950 to 2000 since in both periods, women have more than one child. However, women are having about half the number of children they did in the period following 1950.

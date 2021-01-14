@@ -1,0 +1,145 @@
+---
+title: "Exercise 2.8.2"
+author: "Geoff Hing"
+date: "1/1/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library('qss')
+data(gay, package = "qss")
+```
+
+# Changing Minds on Gay Marriage
+
+## 1.
+
+> Using the baseline interview wave before the treatment is administered, examine
+whether randomization was properly conducted. Base your analysis on the
+three groups of study 1: “same-sex marriage script by gay canvasser,” “same-sex
+marriage script by straight canvasser” and “no contact.” Briefly comment on the
+results.
+
+```{r}
+study.1 <- gay[gay$study == 1, ]
+
+same.sex.gay <- study.1[study.1$treatment == 'Same-Sex Marriage Script by Gay Canvasser', ]
+same.sex.straight <- study.1[study.1$treatment == 'Same-Sex Marriage Script by Straight Canvasser', ]
+no.contact <- study.1[study.1$treatment == 'No Contact', ]
+
+num.same.sex.gay <- dim(same.sex.gay)[1]
+num.same.sex.straight <- dim(same.sex.straight)[1]
+num.no.contact <- dim(no.contact)[1]
+num.total <- dim(study.1)[1]
+
+num.same.sex.gay / num.total
+num.same.sex.straight / num.total
+num.no.contact / num.total
+
+num.same.sex.gay - num.same.sex.straight
+(num.same.sex.gay - num.same.sex.straight) / num.total
+
+```
+
+In study 1, more than half of the subjects received no contact. 748 more subjects received the same-sex marriage script by a gay canvasser than by a straight canvassar, a little over one percent more.
+
+
+## 2. Average treatment effects of gay and straight canvassers
+
+> The second wave of the survey was implemented two months after canvassing.
+Using study 1, estimate the average treatment effects of gay and straight canvassers
+on support for same-sex marriage, separately. Give a brief interpretation
+of the results.
+
+```{r}
+tapply(study.1$ssm, study.1$treatment, mean)
+```
+
+People who were contacted by canvassers using the same-sex marriage script were more supportive of same-sex marriage than those who had no contact with canvassers. Interestingly, people contacted by a gay canvassar with the recycling script had the highest support. People contact by a gay canvassar reading the sam-sex marriage script were only slightly more supportive of same-sex marriage than those contact by a straight canvasser with the same script.
+
+## 3. Treatment and canvassers
+
+> The study contained another treatment that involves contact, but does not
+involve using the gay marriage script. Specifically, the authors used a script
+to encourage people to recycle. What is the purpose of this treatment? Using
+study 1 and wave 2, compare outcomes from the treatment “same-sex marriage
+script by gay canvasser” to “recycling script by gay canvasser.” Repeat the same
+for straight canvassers, comparing the treatment “same-sex marriage script by
+straight canvasser” to “recycling script by straight canvasser.” What do these
+comparisons reveal? Give a substantive interpretation of the results.
+
+```{r}
+study.1.wave.2 <- subset(study.1, wave == 2)
+tapply(study.1.wave.2$ssm, study.1.wave.2$treatment, mean)
+```
+
+The authors used the recycling script to try to differentiate between responses to contact with someone who identifies as gay and responses to the script in particular.
+
+Comparing the role of a gay canvasser with the same-sex marriage and recycling scripts, the impact of a gay canvassar reading the recycling script was more significant. People who got that the treatment of a gay canvassar were more supportive. With the same-sex marriage script, the impact of a gay canvasser was less profound. 
+
+## 4.
+
+> In study 1, the authors reinterviewed the respondents six different times (in
+waves 2 to 7) after treatment, at two-month intervals. The last interview, in
+wave 7, occurs one year after treatment. Do the effects of canvassing last? If
+so, under what conditions? Answer these questions by separately computing the
+average effects of straight and gay canvassers with the same-sex marriage script
+for each of the subsequent waves (relative to the control condition).
+
+```{r}
+study.1.wave.3 <- subset(study.1, wave == 3)
+study.1.wave.4 <- subset(study.1, wave == 4)
+study.1.wave.5 <- subset(study.1, wave == 5)
+study.1.wave.6 <- subset(study.1, wave == 6)
+study.1.wave.7 <- subset(study.1, wave == 7)
+
+# TODO: Figure out how to combine these all into one dataframe
+tapply(study.1.wave.3$ssm, study.1.wave.3$treatment, mean)
+tapply(study.1.wave.4$ssm, study.1.wave.4$treatment, mean)
+tapply(study.1.wave.5$ssm, study.1.wave.5$treatment, mean)
+tapply(study.1.wave.6$ssm, study.1.wave.6$treatment, mean)
+tapply(study.1.wave.7$ssm, study.1.wave.7$treatment, mean)
+```
+
+It looks like, independent of treatment, support for same-sex marriage increased over the period of the study. The difference between support for those who were read the same-sex marriage script by a gay canvasser and a straight canvasser was greater after a year.
+
+
+## 5.
+
+> The researchers conducted a second study to replicate the core results of the first
+study. In this study, same-sex marriage scripts are given only by gay canvassers.
+For study 2, use the treatments “same-sex marriage script by gay canvasser” and
+“no contact” to examine whether randomization was appropriately conducted.
+Use the baseline support from wave 1 for this analysis.
+
+```{r}
+study.2 <- gay[gay$study == 2, ]
+
+study.2.wave.3 <- subset(study.2, wave == 3)
+study.2.wave.4 <- subset(study.2, wave == 4)
+study.2.wave.5 <- subset(study.2, wave == 5)
+study.2.wave.6 <- subset(study.2, wave == 6)
+study.2.wave.7 <- subset(study.2, wave == 7)
+
+# TODO: Figure out how to combine these all into one dataframe
+tapply(study.2.wave.3$ssm, study.2.wave.3$treatment, mean)
+tapply(study.2.wave.4$ssm, study.2.wave.4$treatment, mean)
+tapply(study.2.wave.5$ssm, study.2.wave.5$treatment, mean)
+tapply(study.2.wave.6$ssm, study.2.wave.6$treatment, mean)
+tapply(study.2.wave.7$ssm, study.2.wave.7$treatment, mean)
+```
+```
+
+## 6.
+
+> For study 2, estimate the treatment effects of gay canvassing using data from
+wave 2. Are the results consistent with those of study 1?
+
+## 7.
+
+>Using study 2, estimate the average effect of gay canvassing at each subsequent
+wave and observe how it changes over time. Note that study 2 did not have a
+fifth or sixth wave, but the seventh wave occurred one year after treatment, as in
+study 1. Draw an overall conclusion from both study 1 and study 2.

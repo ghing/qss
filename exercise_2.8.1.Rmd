@@ -1,0 +1,123 @@
+---
+title: "Exercise 2.8.1"
+output: html_notebook
+---
+
+
+
+```{r, setup, include=FALSE}
+library(qss)
+```
+
+```{r, load_star, include=FALSE}
+data(STAR, package = "qss")
+```
+
+## 1.
+
+```{r}
+STAR$kinder <- factor(STAR$classtype)
+levels(STAR$kinder) <- c("small", "regular", "regular with aid")
+
+STAR$race <- factor(STAR$race)
+levels(STAR$race) <- c("white", "black", "Asian", "Hispanic", "Native American", "others")
+```
+
+## 2.
+
+Students who had small kindergarden class sizes had a higher average score on reading tests than students in the other two class types. There was a negligible difference between the average scores in classes with or without an aid. 
+
+There was a negligible difference in average math scores between students who had small and regular kindergarden classes. Students who were in a regular class size with an aid had a slightly lower average class size.
+
+```{r}
+means_reading <- tapply(STAR$g4reading, STAR$kinder, mean, na.rm = TRUE)
+means_math <- tapply(STAR$g4math, STAR$kinder, mean, na.rm = TRUE)
+
+print(means_reading)
+
+print(means_math)
+```
+However, taking into account the standard deviation, the effect of small class size on reading test scores is quite small.
+
+See [What does effect size tell you? | Simply Psychology](https://www.simplypsychology.org/effect-size.html)
+```{r}
+sd_reading <- sd(STAR$g4reading, na.rm = TRUE)
+sd_math <- sd(STAR$g4math, na.rm = TRUE)
+
+unname((means_reading[1] - means_reading[2]) / sd_reading)
+```
+
+## 3.
+
+The differences between high scores (66th percentile) and low scores (33rd percentile) are negligible between students with small and regular kindergarten classes, for both math and reading tests. 
+
+```{r}
+qs_small <- quantile(STAR$g4reading[STAR$kinder == "small"], c(0.33, 0.66), na.rm = TRUE)
+qs_reg <- quantile(STAR$g4reading[STAR$kinder == "regular"], c(0.33, 0.66), na.rm = TRUE)
+
+qs_small
+qs_reg
+```
+
+```{r}
+qs_small <- quantile(STAR$g4math[STAR$kinder == "small"], c(0.33, 0.66), na.rm = TRUE)
+qs_reg <- quantile(STAR$g4math[STAR$kinder == "regular"], c(0.33, 0.66), na.rm = TRUE)
+
+qs_small
+qs_reg
+```
+
+## 4.
+
+Students who were in a small kindergarten classroom made up the largest share of students who were in multiple years of small classrooms.
+
+```{r}
+kinder_yearssmall_xtab <- table(kinder = STAR$kinder, yearssmall = STAR$yearssmall)
+prop.table(kinder_yearssmall_xtab)
+```
+Students who spent four years in small classrooms had the highest reading scores. Students with one year in a small classroom also had a higher test score than those who spent no years. However, there was a negligible effect for students who spent two or three years in a smaller classroom. In fact, students who spent only two years in a small classroom had lower scores than students who had never had a small classroom.
+
+This makes me wonder if the real effect is from small kindergarten classes. Students seem to benefit from this, and benefit the most if they continue to have a small class size for all four years. But, perhaps having a small class only has a negligible effect if a child did not have a small kindergarten class.
+
+```{r}
+tapply(STAR$g4reading, STAR$yearssmall, mean, na.rm = TRUE)
+tapply(STAR$g4reading, STAR$yearssmall, median, na.rm = TRUE)
+```
+Again, there doesn't seem to be an effect of small kindergarten classes on math test scores.
+
+```{r}
+tapply(STAR$g4math, STAR$yearssmall, mean, na.rm = TRUE)
+tapply(STAR$g4math, STAR$yearssmall, median, na.rm = TRUE)
+```
+## 5.
+
+Regardless of kindergarten class size, white students had higher average test scores than minority students.
+
+```{r}
+STAR$white_minority <- as.factor(ifelse(
+  STAR$race == "white",
+  "white",
+  ifelse(
+    STAR$race == "black" | STAR$race == "Hispanic",
+    "minority",
+    NA
+  )
+))
+k_regular <- STAR[STAR$kinder == "regular" & !is.na(STAR$white_minority),]
+tapply(k_regular$g4reading, k_regular$white_minority, mean, na.rm = TRUE)
+tapply(k_regular$g4math, k_regular$white_minority, mean, na.rm = TRUE)
+```
+However, while both white and minority students who were in small kindergarten classes had higher average reading test scores than those of the same race who did not, minority students had a 10 point higher average reading score. The increase in average score for white students was smaller.
+
+```{r}
+k_small <-  STAR[STAR$kinder == "small" & !is.na(STAR$white_minority),]
+tapply(k_small$g4reading, k_small$white_minority, mean, na.rm = TRUE)
+tapply(k_small$g4math, k_small$white_minority, mean, na.rm = TRUE)
+```
+```{r}
+table(STAR$white_minority, STAR$kinder)
+```
+```{r}
+table(STAR$kinder, STAR$hsgrad)
+```
+
