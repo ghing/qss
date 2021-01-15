@@ -117,7 +117,50 @@ tapply(k_small$g4math, k_small$white_minority, mean, na.rm = TRUE)
 ```{r}
 table(STAR$white_minority, STAR$kinder)
 ```
+
+## 6.
+
 ```{r}
 table(STAR$kinder, STAR$hsgrad)
+```
+
+Kindergarten size seems to have a negligble effect on graduation rate. Around 83-84% of students graduated regardless of their kindergarten class size.
+
+```{r}
+tapply(STAR$hsgrad, STAR$kinder, mean, na.rm = TRUE)
+```
+
+Spending 4 years in small classes seemed to impact graduation rates. Nearly 88% of students who spent four years in small classes graduated, compared with 83% of those who spent three years in small classes or no years. The graduation rate between students who spent one or two years in small classes is smaller than either of the aforementioned categories.
+
+```{r}
+tapply(STAR$hsgrad, STAR$yearssmall, mean, na.rm = TRUE)
+```
+
+White students graduated at a higher rate than minority students.
+
+```{r}
+tapply(STAR$hsgrad, STAR$white_minority, mean, na.rm = TRUE)
+```
+
+White and minority students who were in small kindergarten classes did not have significantly different graduation rates than those who were not.
+
+```{r}
+tapply(k_small$hsgrad, k_small$white_minority, mean, na.rm = TRUE)
+```
+
+For both white and minority students, students in small classes for four years had the highest graduation rates of any group. However, the difference in graduation rates between students with no years in small classes and those with four years was greater minority students than for white ones.
+
+```{r}
+small_0_yrs <-  STAR[STAR$yearssmall == 0 & !is.na(STAR$white_minority),]
+small_1_yrs <-  STAR[STAR$yearssmall == 1 & !is.na(STAR$white_minority),]
+small_2_yrs <-  STAR[STAR$yearssmall == 2 & !is.na(STAR$white_minority),]
+small_3_yrs <-  STAR[STAR$yearssmall == 3 & !is.na(STAR$white_minority),]
+small_4_yrs <-  STAR[STAR$yearssmall == 4 & !is.na(STAR$white_minority),]
+tapply(small_0_yrs$hsgrad, small_0_yrs$white_minority, mean, na.rm = TRUE)
+tapply(small_1_yrs$hsgrad, small_1_yrs$white_minority, mean, na.rm = TRUE)
+tapply(small_2_yrs$hsgrad, small_2_yrs$white_minority, mean, na.rm = TRUE)
+tapply(small_3_yrs$hsgrad, small_3_yrs$white_minority, mean, na.rm = TRUE)
+tapply(small_4_yrs$hsgrad, small_4_yrs$white_minority, mean, na.rm = TRUE)
+
 ```
 
