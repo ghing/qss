@@ -22,29 +22,24 @@ three groups of study 1: “same-sex marriage script by gay canvasser,” “sam
 marriage script by straight canvasser” and “no contact.” Briefly comment on the
 results.
 
+
 ```{r}
-study.1 <- gay[gay$study == 1, ]
+study1 <- gay[gay$study == 1, ]
 
-same.sex.gay <- study.1[study.1$treatment == 'Same-Sex Marriage Script by Gay Canvasser', ]
-same.sex.straight <- study.1[study.1$treatment == 'Same-Sex Marriage Script by Straight Canvasser', ]
-no.contact <- study.1[study.1$treatment == 'No Contact', ]
+study1_wave1_table <- table(study1[study1$wave == 1, c("treatment")])
+unname(study1_wave1_table["Same-Sex Marriage Script by Gay Canvasser"] - study1_wave1_table["Same-Sex Marriage Script by Straight Canvasser"])
 
-num.same.sex.gay <- dim(same.sex.gay)[1]
-num.same.sex.straight <- dim(same.sex.straight)[1]
-num.no.contact <- dim(no.contact)[1]
-num.total <- dim(study.1)[1]
-
-num.same.sex.gay / num.total
-num.same.sex.straight / num.total
-num.no.contact / num.total
-
-num.same.sex.gay - num.same.sex.straight
-(num.same.sex.gay - num.same.sex.straight) / num.total
-
+prop.table(study1_wave1_table)
 ```
 
-In study 1, more than half of the subjects received no contact. 748 more subjects received the same-sex marriage script by a gay canvasser than by a straight canvassar, a little over one percent more.
 
+```{r}
+study1_wave1 <- study1[study1$wave == 1,]
+tapply(study1_wave1$ssm, study1_wave1$treatment, mean)
+```
+In wave 1 of study 1, more than half of the subjects received no contact. 118 more subjects received the same-sex marriage script by a gay canvasser than by a straight canvasser, a little over one percent more.
+
+There are significant differences in support in this pre-treatment wave, suggesting that there were issues with randomization.
 
 ## 2. Average treatment effects of gay and straight canvassers
 
@@ -54,10 +49,10 @@ on support for same-sex marriage, separately. Give a brief interpretation
 of the results.
 
 ```{r}
-tapply(study.1$ssm, study.1$treatment, mean)
+study1_wave2 <- study1[study1$wave == 2,]
+tapply(study1_wave2$ssm, study1_wave2$treatment, mean)
 ```
-
-People who were contacted by canvassers using the same-sex marriage script were more supportive of same-sex marriage than those who had no contact with canvassers. Interestingly, people contacted by a gay canvassar with the recycling script had the highest support. People contact by a gay canvassar reading the sam-sex marriage script were only slightly more supportive of same-sex marriage than those contact by a straight canvasser with the same script.
+People who were contacted by canvassers using the same-sex marriage script were more supportive of same-sex marriage than those who had no contact with canvassers. People contact by a gay canvasser reading the sam-sex marriage script were slightly less supportive of same-sex marriage than those contact by a straight canvasser with the same script.
 
 ## 3. Treatment and canvassers
 
@@ -71,13 +66,12 @@ straight canvasser” to “recycling script by straight canvasser.” What do t
 comparisons reveal? Give a substantive interpretation of the results.
 
 ```{r}
-study.1.wave.2 <- subset(study.1, wave == 2)
-tapply(study.1.wave.2$ssm, study.1.wave.2$treatment, mean)
+tapply(study1_wave2$ssm, study1_wave2$treatment, mean)
 ```
 
 The authors used the recycling script to try to differentiate between responses to contact with someone who identifies as gay and responses to the script in particular.
 
-Comparing the role of a gay canvasser with the same-sex marriage and recycling scripts, the impact of a gay canvassar reading the recycling script was more significant. People who got that the treatment of a gay canvassar were more supportive. With the same-sex marriage script, the impact of a gay canvasser was less profound. 
+Comparing the role of a gay canvasser with the same-sex marriage and recycling scripts, the impact of a gay canvasser reading the recycling script was more significant. People who got that the treatment of a gay canvasser were more supportive. With the same-sex marriage script, the impact of a gay canvasser was less profound. 
 
 ## 4.
 
@@ -89,22 +83,10 @@ average effects of straight and gay canvassers with the same-sex marriage script
 for each of the subsequent waves (relative to the control condition).
 
 ```{r}
-study.1.wave.3 <- subset(study.1, wave == 3)
-study.1.wave.4 <- subset(study.1, wave == 4)
-study.1.wave.5 <- subset(study.1, wave == 5)
-study.1.wave.6 <- subset(study.1, wave == 6)
-study.1.wave.7 <- subset(study.1, wave == 7)
-
-# TODO: Figure out how to combine these all into one dataframe
-tapply(study.1.wave.3$ssm, study.1.wave.3$treatment, mean)
-tapply(study.1.wave.4$ssm, study.1.wave.4$treatment, mean)
-tapply(study.1.wave.5$ssm, study.1.wave.5$treatment, mean)
-tapply(study.1.wave.6$ssm, study.1.wave.6$treatment, mean)
-tapply(study.1.wave.7$ssm, study.1.wave.7$treatment, mean)
+tapply(study1$ssm, list(study1$wave, study1$treatment), mean)
 ```
 
-It looks like, independent of treatment, support for same-sex marriage increased over the period of the study. The difference between support for those who were read the same-sex marriage script by a gay canvasser and a straight canvasser was greater after a year.
-
+It looks like, independent of treatment, support for same-sex marriage increased over the period of the study. There seems to be the greatest increase in the final year for all kinds of treatment. Participants who had contact with a gay canvasser had higher support for gay marriage by the last survey than straight canvassers. And, the support was highest among people who received the recycling script by a gay canvasser. It seems like contact with a gay person has more of an effect than the message, especially since the group that received no treatment was more supportive of same-sex marriage than the groups that got eather script by a straight canvasser.
 
 ## 5.
 
@@ -115,7 +97,23 @@ For study 2, use the treatments “same-sex marriage script by gay canvasser” 
 Use the baseline support from wave 1 for this analysis.
 
 ```{r}
-study.2 <- gay[gay$study == 2, ]
+study2 <- gay[gay$study == 2, ]
+
+table(study2[study2$wave == 1, c("treatment")])
+
+prop.table(table(study2[study2$wave == 1, c("treatment")]))
+```
+In this study, the treatment and non-treatment groups are about the same size.
+
+BOOKMARK
+
+```{r}
+
+```
+
+
+```{r}
+study2 <- gay[gay$study == 2, ]
 
 study.2.wave.3 <- subset(study.2, wave == 3)
 study.2.wave.4 <- subset(study.2, wave == 4)
